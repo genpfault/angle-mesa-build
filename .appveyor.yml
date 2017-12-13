@@ -24,15 +24,13 @@ install:
   # install flex/bison
   - if not exist win_flex_bison-2.5.13.zip appveyor DownloadFile "https://sourceforge.net/projects/winflexbison/files/win_flex_bison-2.5.13.zip"
   - 7z x -y -owinflexbison\ win_flex_bison-2.5.13.zip > nul
+  - set Path=%CD%\winflexbison;%Path%
   - win_flex --version
   - win_bison --version
-  
-  - dir C:\Libraries\llvm-5.0.0
 
 build_script:
-  - cd C:\projects\angle-mesa-build
-  - cd mesa
-  - set Path=C:\projects\angle-mesa-build\winflexbison;%Path%
+  - cd %APPVEYOR_BUILD_FOLDER%\mesa
   - set LLVM=C:\Libraries\llvm-5.0.0
-  - if "%PLATFORM%"=="x86" (scons machine=x86 platform=windows build=release texture_float=yes llvm=yes libgl-gdi)
-#  - if "%PLATFORM%"=="x64" (scons machine=x86_64 platform=windows build=release texture_float=yes llvm=yes libgl-gdi)
+  - scons machine=x86 platform=windows build=release texture_float=yes llvm=yes libgl-gdi
+
+#- if "%PLATFORM%"=="x64" (scons machine=x86_64 platform=windows build=release texture_float=yes llvm=yes libgl-gdi)
