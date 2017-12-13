@@ -2,8 +2,8 @@ image:
   - Visual Studio 2015
 
 platform:
-  - x86
-#  - x64
+#  - x86
+  - x64
 
 configuration:
   - Release
@@ -12,6 +12,9 @@ cache:
   - win_flex_bison-2.5.13.zip
   
 install:
+  # pull down ANGLE & Mesa
+  - git submodule update --init --recursive
+
   # install python prereqs
   - python --version
   - python -m pip --version
@@ -31,6 +34,5 @@ install:
 build_script:
   - cd %APPVEYOR_BUILD_FOLDER%\mesa
   - set LLVM=C:\Libraries\llvm-5.0.0
-  - scons machine=x86 platform=windows build=release texture_float=yes llvm=yes libgl-gdi
-
-#- if "%PLATFORM%"=="x64" (scons machine=x86_64 platform=windows build=release texture_float=yes llvm=yes libgl-gdi)
+  - if "%PLATFORM%"=="x86" (scons machine=x86 platform=windows build=release texture_float=yes llvm=yes libgl-gdi)
+  - if "%PLATFORM%"=="x64" (scons machine=x86_64 platform=windows build=release texture_float=yes llvm=yes libgl-gdi)
