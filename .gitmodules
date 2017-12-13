@@ -1,0 +1,8 @@
+[submodule "angle"]
+	path = angle
+	url = https://chromium.googlesource.com/angle/angle
+	shallow = true
+[submodule "mesa"]
+	path = mesa
+	url = https://anongit.freedesktop.org/git/mesa/mesa.git
+	shallow = true
