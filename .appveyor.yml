@@ -10,6 +10,7 @@ configuration:
 
 cache:
   - win_flex_bison-2.5.13.zip
+  - llvm-5.0.0.src.tar.xz
   
 install:
   # pull down ANGLE & Mesa
@@ -31,8 +32,21 @@ install:
   - win_flex --version
   - win_bison --version
 
+  # install LLVM sources
+  - if not exist llvm-5.0.0.src.tar.xz appveyor DownloadFile "http://releases.llvm.org/5.0.0/llvm-5.0.0.src.tar.xz"
+  - 7z x "llvm-5.0.0.src.tar.xz" -so | 7z x -aoa -si -ttar
+
 build_script:
+  # build LLVM
+  - mkdir %APPVEYOR_BUILD_FOLDER%\llvm-build
+  - cd %APPVEYOR_BUILD_FOLDER%\llvm-build
+  - if "%PLATFORM%"=="x86" ( cmake %APPVEYOR_BUILD_FOLDER%\llvm-5.0.0.src -G "Visual Studio 14 2015" -DCMAKE_INSTALL_PREFIX=%APPVEYOR_BUILD_FOLDER%/llvm-bin -DCMAKE_SYSTEM_VERSION=10.0 -DLLVM_TARGETS_TO_BUILD="X86" -DLLVM_BUILD_TOOLS=OFF -DLLVM_INCLUDE_TOOLS=OFF -DLLVM_BUILD_EXAMPLES=OFF -DLLVM_INCLUDE_EXAMPLES=OFF -DLLVM_BUILD_TESTS=OFF -DLLVM_INCLUDE_TESTS=OFF -DLLVM_COMPILER_JOBS=2 -DLLVM_APPEND_VC_REV=OFF -DLLVM_USE_CRT_RELEASE=MT -Thost=x64 )
+  - if "%PLATFORM%"=="x64" ( cmake %APPVEYOR_BUILD_FOLDER%\llvm-5.0.0.src -G "Visual Studio 14 2015 Win64" -DCMAKE_INSTALL_PREFIX=%APPVEYOR_BUILD_FOLDER%/llvm-bin -DCMAKE_SYSTEM_VERSION=10.0 -DLLVM_TARGETS_TO_BUILD="X86" -DLLVM_BUILD_TOOLS=OFF -DLLVM_INCLUDE_TOOLS=OFF -DLLVM_BUILD_EXAMPLES=OFF -DLLVM_INCLUDE_EXAMPLES=OFF -DLLVM_BUILD_TESTS=OFF -DLLVM_INCLUDE_TESTS=OFF -DLLVM_COMPILER_JOBS=2 -DLLVM_APPEND_VC_REV=OFF -DLLVM_USE_CRT_RELEASE=MT -Thost=x64 )
+  - cmake --build . --config Release --target ALL_BUILD
+  - cmake --build . --config Release --target INSTALL
+
+  # build Mesa
   - cd %APPVEYOR_BUILD_FOLDER%\mesa
-  - set LLVM=C:\Libraries\llvm-5.0.0
+  - set LLVM=%APPVEYOR_BUILD_FOLDER%/llvm-bin
   - if "%PLATFORM%"=="x86" (scons machine=x86 platform=windows build=release texture_float=yes llvm=yes libgl-gdi)
   - if "%PLATFORM%"=="x64" (scons machine=x86_64 platform=windows build=release texture_float=yes llvm=yes libgl-gdi)
